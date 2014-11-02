@@ -21,6 +21,21 @@ public class MainFrame extends JFrame {
 	private static final long serialVersionUID = 8456560429229699542L;
 	private JButton goButton;
 	private JTextField textField;
+	private JLabel symbolLabel;
+	private JLabel lastLabel;
+	private JLabel dateLabel;
+	private JLabel timeLabel;
+	private JLabel changeLabel;
+	private JLabel openLabel;
+	private JLabel highLabel;
+	private JLabel lowLabel;
+	private JLabel volumeLabel;
+	private JLabel marketCapitalLabel;
+	private JLabel previousCloseLabel;
+	private JLabel percentageChangeLabel;
+	private JLabel annRangeLabel;
+	private JLabel earnsLabel;
+	private JLabel PELabel;
 	private JLabel nameLabel;
 
 	/**
@@ -43,13 +58,44 @@ public class MainFrame extends JFrame {
 
 		goButton = new JButton("Go");
 		textField = new JTextField(10);
-		nameLabel = new JLabel("Name");
+		symbolLabel = new JLabel("-");
+		lastLabel = new JLabel("-");
+		dateLabel = new JLabel("-");
+		timeLabel = new JLabel("-");
+		changeLabel = new JLabel("-");
+		openLabel = new JLabel("-");
+		highLabel = new JLabel("-");
+		lowLabel = new JLabel("-");
+		volumeLabel = new JLabel("-");
+		marketCapitalLabel = new JLabel("-");
+		previousCloseLabel = new JLabel("-");
+		percentageChangeLabel = new JLabel("-");
+		annRangeLabel = new JLabel("-");
+		earnsLabel = new JLabel("-");
+		PELabel = new JLabel("-");
+		nameLabel = new JLabel("-");
 
 		add(new JLabel("Enter URL of the RSS feed"));
 		add(textField);
 		add(goButton);
+		
+		add(symbolLabel);
+		add(lastLabel);
+		add(dateLabel);
+		add(timeLabel);
+		add(changeLabel);
+		add(openLabel);
+		add(highLabel);
+		add(lowLabel);
+		add(volumeLabel);
+		add(marketCapitalLabel);
+		add(previousCloseLabel);
+		add(percentageChangeLabel);
+		add(annRangeLabel);
+		add(earnsLabel);
+		add(PELabel);
 		add(nameLabel);
-
+		
 		Dimension fixedDimension = new Dimension(650, 400);
 		setPreferredSize(fixedDimension);
 		setResizable(false);
@@ -76,6 +122,22 @@ public class MainFrame extends JFrame {
 	
 	public void updateGUI(StockQuote stockQuote) {
 		Stock stock = stockQuote.getStock();
+		symbolLabel.setText(stock.getSymbol());
+		lastLabel.setText(stock.getLast() + "");
+		dateLabel.setText(stock.getDate());
+		timeLabel.setText(stock.getTime());
+		changeLabel.setText(stock.getChange() + "");
+//		closeLabel.setText(stock.getClose());
+		openLabel.setText(stock.getOpen() + "");
+		highLabel.setText(stock.getHigh() + "");
+		lowLabel.setText(stock.getLow() + "");
+		volumeLabel.setText(stock.getVolume() + "");
+		marketCapitalLabel.setText(stock.getMarketCapital() + "");
+		previousCloseLabel.setText(stock.getPreviousClose() + "");
+		percentageChangeLabel.setText(stock.getPercentageChange());
+		annRangeLabel.setText(stock.getAnnRange());
+		earnsLabel.setText(stock.getEarns() + "");
+		PELabel.setText(stock.getPE() + "");
 		nameLabel.setText(stock.getName());
 	}
 
