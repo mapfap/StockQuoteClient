@@ -1,12 +1,16 @@
 package controller;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.ws.WebServiceException;
 
 import view.MainFrame;
 import model.StockQuote;
@@ -22,6 +26,9 @@ public class RequestWorker extends SwingWorker<StockQuote, Void> {
 	private MainFrame frame;
 	private String input;
 	private StockQuoteSoap proxy;
+	private boolean isTimeout = false;
+	private Timer timer;
+	private static final int timeout = 3000; //ms
 	
 	public RequestWorker(MainFrame frame, String input, StockQuoteSoap proxy) {
 		this.frame = frame;
@@ -34,17 +41,44 @@ public class RequestWorker extends SwingWorker<StockQuote, Void> {
 	 */
 	@Override
 	protected StockQuote doInBackground() throws Exception {
-		proxy = StockQuoteProxyFactory.getInstance().createStockQuoteProxy();
-		String data = proxy.getQuote(input);
-		StockQuote stockQuote = convertBytesToStockQuote(data.getBytes());
-		return stockQuote;
+		setTimeout(timeout);
+		
+		try {			
+			String data = proxy.getQuote(input);
+			StockQuote stockQuote  = convertBytesToStockQuote(data.getBytes());
+			return stockQuote;
+		} catch (WebServiceException e) {
+			return null;
+		}
+		
 	}
 	
+	/**
+	 * If the time reach limit, then terminate the task.
+	 * @param timeout time in milliseconds before termination
+	 */
+	private void setTimeout(int timeout) {
+		final RequestWorker worker = this;
+		 timer = new Timer(timeout, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				isTimeout = true;
+				worker.cancel(true);
+			}
+		});
+		timer.start();
+	}
+
 	/**
 	 * When data is done loading, call the update on UI.
 	 */
 	@Override
 	protected void done() {
+		timer.stop();
+		if (isTimeout) {
+			frame.doneLoading(null);
+			return;
+		}
 		if (!isCancelled()) {
 			try {
 				frame.doneLoading(get());

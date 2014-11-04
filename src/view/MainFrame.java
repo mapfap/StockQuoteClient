@@ -87,7 +87,7 @@ public class MainFrame extends JFrame {
 		add(bodyPanel, BorderLayout.CENTER);
 		
 		JPanel paddingLeftPanel = new JPanel();
-		paddingLeftPanel.setPreferredSize(new Dimension(100, 100));
+		paddingLeftPanel.setPreferredSize(new Dimension(75, 75));
 		add(paddingLeftPanel, BorderLayout.WEST);
 		
 		add(new JLabel("<html><div style='padding: 5px; height: 18px; width: 700px; text-align:left; background: #2a2a2a; color: white;'>Developed by Sarun Wongtanakarn</div></html>"), BorderLayout.SOUTH);
@@ -212,10 +212,16 @@ public class MainFrame extends JFrame {
 	public void doneLoading(StockQuote stockQuote) {
 		loading = false;
 		loadingLabel.setText("");
+		
+		if (stockQuote == null) {
+			alert("Please check your network connection.");
+			return;
+		}
+		
 		Stock stock = stockQuote.getStock();
 		
 		if (stock.getDate().equals("N/A")) {
-			JOptionPane.showMessageDialog(null, "'" + stock.getName() + "' is not valid stock symbol");
+			alert("'" + stock.getName() + "' is not valid stock symbol.");
 			return;
 		}
 		
@@ -259,7 +265,7 @@ public class MainFrame extends JFrame {
 			try {
 				proxy = StockQuoteProxyFactory.getInstance().createStockQuoteProxy();
 			} catch (WebServiceException e) {
-				JOptionPane.showMessageDialog(null, "No network connection");
+				alert("No network connection, please try again.");
 				return;
 			}
 		}
@@ -268,6 +274,14 @@ public class MainFrame extends JFrame {
 		requestWorker.execute();
 		loadingLabel.setText("Loading '" + input + "'..");
 		loading = true;
+	}
+	
+	/**
+	 * Show the message dialog with specified text.
+	 * @param text text to be shown on dialog.
+	 */
+	private void alert(String text) {
+		JOptionPane.showMessageDialog(null, text);
 	}
 
 		
