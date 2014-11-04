@@ -28,7 +28,7 @@ public class RequestWorker extends SwingWorker<StockQuote, Void> {
 	private StockQuoteSoap proxy;
 	private boolean isTimeout = false;
 	private Timer timer;
-	private static final int timeout = 3000; //ms
+	private static final int timeout = 5000; //ms
 	
 	public RequestWorker(MainFrame frame, String input, StockQuoteSoap proxy) {
 		this.frame = frame;
