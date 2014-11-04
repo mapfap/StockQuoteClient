@@ -1,4 +1,8 @@
+package main;
+
 import javax.swing.SwingUtilities;
+
+import view.MainFrame;
 
 public class Main {
 
