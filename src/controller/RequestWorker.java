@@ -12,32 +12,44 @@ import view.MainFrame;
 import model.StockQuote;
 import net.webservicex.StockQuoteSoap;
 
-
+/**
+ * Swing Worker that connect to the SOAP service and update the UI.
+ * @author Sarun Wongtanakarn
+ *
+ */
 public class RequestWorker extends SwingWorker<StockQuote, Void> {
 
 	private MainFrame frame;
 	private String input;
+	private StockQuoteSoap proxy;
 	
-	public RequestWorker(MainFrame frame, String input) {
+	public RequestWorker(MainFrame frame, String input, StockQuoteSoap proxy) {
 		this.frame = frame;
 		this.input = input;
+		this.proxy = proxy;
 	}
 	
+	/**
+	 * Do retrieve data from the remote service in the background.
+	 */
 	@Override
 	protected StockQuote doInBackground() throws Exception {
-		net.webservicex.StockQuote factory = new net.webservicex.StockQuote();
-		StockQuoteSoap proxy = factory.getStockQuoteSoap();
 		String data = proxy.getQuote(input);
 		StockQuote stockQuote = convertBytesToStockQuote(data.getBytes());
 		return stockQuote;
 	}
 	
+	/**
+	 * When data is done loading, call the update on UI.
+	 */
 	@Override
 	protected void done() {
-		try {
-			frame.doneLoading(get());
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+		if (!isCancelled()) {
+			try {
+				frame.doneLoading(get());
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

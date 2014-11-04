@@ -13,21 +13,26 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
+import net.webservicex.StockQuoteSoap;
 import model.Stock;
 import model.StockQuote;
 import controller.RequestWorker;
 
 /**
- * Main JFrame, holds whole application in it.
+ * Main JFrame,
+ * Initialize all the UI components for user input of 'Stock Symbol'
+ * and update the result retrieved from the remote service.
  * 
  * @author Sarun Wongtanakarn 5510546166
  *
  */
 public class MainFrame extends JFrame {
 
-	private static final long serialVersionUID = 8456560429229699542L;
+	private static final long serialVersionUID = 8456560455229699542L;
 	private JButton goButton;
 	private JTextField textField;
 	private JLabel lastLabel;
@@ -48,29 +53,46 @@ public class MainFrame extends JFrame {
 	
 	private boolean loading = false;
 	private RequestWorker requestWorker;
+	private StockQuoteSoap proxy;
 
 	/**
 	 * Create and setup the main frame.
-	 * @param rssReader a controller for fetching rss.
+	 * @param proxy stock quote SOAP service.
 	 */
-	public MainFrame() {
+	public MainFrame(StockQuoteSoap proxy) {
 		super("Stock Quote");
+
+		this.proxy = proxy;
 
 		initUI();
 		setListeners();
 
 		pack();
 		setVisible(true);
+		
 	}
 
+	/**
+	 * Initialize the UI components.
+	 */
 	private void initUI() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	
 		JPanel headPanel = new JPanel();
 		add(headPanel, BorderLayout.NORTH);
 		
+		add(new JSeparator(SwingConstants.HORIZONTAL), BorderLayout.SOUTH);
+		
 		JPanel bodyPanel = new JPanel();
 		add(bodyPanel, BorderLayout.CENTER);
+		
+		JPanel paddingLeftPanel = new JPanel();
+		paddingLeftPanel.setPreferredSize(new Dimension(100, 100));
+		add(paddingLeftPanel, BorderLayout.WEST);
+		
+//		JPanel paddingBottomPanel = new JPanel();
+//		paddingBottomPanel.setPreferredSize(new Dimension(50, 50));
+//		add(paddingBottomPanel, BorderLayout.SOUTH);
 		
 		headPanel.setLayout(new GridLayout(0,1));
 		bodyPanel.setLayout(new GridLayout(0,4));
@@ -85,7 +107,7 @@ public class MainFrame extends JFrame {
 		
 		JPanel inputPanel = new JPanel();
 		headPanel.add(inputPanel);
-		inputPanel.add(new JLabel("Enter symbol: "));
+		inputPanel.add(new JLabel("Enter stock symbol "));
 		inputPanel.add(textField);
 		inputPanel.add(goButton);
 		
@@ -118,6 +140,9 @@ public class MainFrame extends JFrame {
 		setResizable(false);
 	}
 
+	/**
+	 * Initialize the label.
+	 */
 	private void initLabel() {
 		nameLabel = new JLabel("");
 		loadingLabel = new JLabel("");
@@ -136,6 +161,9 @@ public class MainFrame extends JFrame {
 		PELabel = new JLabel("-");
 	}
 	
+	/**
+	 * Clear the text on all label.
+	 */
 	private void clearText() {
 		nameLabel.setText("");
 		loadingLabel.setText("");
@@ -154,6 +182,10 @@ public class MainFrame extends JFrame {
 		PELabel.setText("-");
 	}
 	
+	/**
+	 * Emphasise (bold) all the label given in the array.
+	 * @param labels array of label to be emphasised.
+	 */
 	private void emphasiseLabel(JLabel[] labels) {
 		Font boldFont = new Font("Sans Serif", Font.BOLD, 16);
 		
@@ -163,6 +195,9 @@ public class MainFrame extends JFrame {
 		
 	}
 
+	/**
+	 * Set the listeners for input action.
+	 */
 	private void setListeners() {
 		textField.addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent e) {
@@ -182,13 +217,17 @@ public class MainFrame extends JFrame {
 		});
 	}
 	
+	/**
+	 * This is called when the worker done loading the data from remote service.
+	 * It's update the UI according to the data retrieve.
+	 */
 	public void doneLoading(StockQuote stockQuote) {
 		loading = false;
 		loadingLabel.setText("");
 		Stock stock = stockQuote.getStock();
 		
 		if (stock.getDate().equals("N/A")) {
-			alert("Not found");
+			alert("'" + stock.getName() + "' is not valid stock symbol");
 			return;
 		}
 		
@@ -209,6 +248,9 @@ public class MainFrame extends JFrame {
 		changeLabel.setText("<html><div style='color: "+ color +";'>" + stock.getChange() + " (" + stock.getPercentageChange() + ")" + "<div></html>");
 	}
 
+	/**
+	 * Initiate the worker to retrieve the data.
+	 */
 	protected void retrieve() {
 		if (loading) {
 			textField.setFocusable(false);
@@ -228,7 +270,7 @@ public class MainFrame extends JFrame {
 		
 		clearText();
 		String input = textField.getText();
-		requestWorker = new RequestWorker(this, input);
+		requestWorker = new RequestWorker(this, input, proxy);
 		requestWorker.execute();
 		loadingLabel.setText("Loading " + input + "..");
 		loading = true;
