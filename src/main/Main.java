@@ -24,7 +24,7 @@ public class Main {
 			public void run() {
 				StockQuoteProxyFactory factory = StockQuoteProxyFactory.getInstance();
 				try {					
-//					stockQuoteProxy = factory.createStockQuoteProxy();
+					stockQuoteProxy = factory.createStockQuoteProxy();
 				} catch (WebServiceException e) {
 					// If there's no network connection, Ignore it and try to connect again later.
 				}

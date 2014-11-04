@@ -1,15 +1,11 @@
 package view;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -20,9 +16,9 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.xml.ws.WebServiceException;
 
-import net.webservicex.StockQuoteSoap;
 import model.Stock;
 import model.StockQuote;
+import net.webservicex.StockQuoteSoap;
 import controller.RequestWorker;
 import controller.StockQuoteProxyFactory;
 
@@ -55,7 +51,6 @@ public class MainFrame extends JFrame {
 	private JLabel loadingLabel;
 	
 	private static final Font boldFont = new Font("Verdana", Font.BOLD, 16);
-	private static final Font bigFont = new Font("Verdana", Font.BOLD, 20);
 	
 	private boolean loading = false;
 	private RequestWorker requestWorker;
@@ -95,16 +90,8 @@ public class MainFrame extends JFrame {
 		paddingLeftPanel.setPreferredSize(new Dimension(100, 100));
 		add(paddingLeftPanel, BorderLayout.WEST);
 		
-//		JPanel paddingBottomPanel = new JPanel();
-//		paddingBottomPanel.setPreferredSize(new Dimension(40, 40));
-//		add(paddingBottomPanel, BorderLayout.SOUTH);
 		add(new JLabel("<html><div style='padding: 5px; height: 18px; width: 700px; text-align:left; background: #2a2a2a; color: white;'>Developed by Sarun Wongtanakarn</div></html>"), BorderLayout.SOUTH);
 		
-		
-		
-//		JPanel padddingTopPanel = new JPanel();
-//		padddingTopPanel.setPreferredSize(new Dimension(40, 40));
-//		headPanel.add(padddingTopPanel);
 		headPanel.add(new JLabel("<html><div style='height: 30px; line-height: 20px; width: 700px; text-align:center; background: #2a2a2a; color: white; font-size: 18px; font-weight: bold;'>Stock Quote</div></html>"));
 		
 		headPanel.setLayout(new GridLayout(0,1));
@@ -159,7 +146,6 @@ public class MainFrame extends JFrame {
 	private void initLabel() {
 		nameLabel = new JLabel("");
 		loadingLabel = new JLabel("");
-		
 		timeLabel = new JLabel("-");
 		lastLabel = new JLabel("-");
 		changeLabel = new JLabel("-");
@@ -179,8 +165,7 @@ public class MainFrame extends JFrame {
 	 */
 	private void clearText() {
 		nameLabel.setText("");
-		loadingLabel.setText("");
-		                
+		loadingLabel.setText("");   
 		timeLabel.setText("-");
 		lastLabel.setText("-");
 		changeLabel.setText("-");
@@ -200,33 +185,24 @@ public class MainFrame extends JFrame {
 	 * @param labels array of label to be emphasised.
 	 */
 	private void emphasiseLabel(JLabel[] labels) {
-		
 		for (JLabel label : labels) {
 			label.setFont(boldFont);
 		}
-		
 	}
 
 	/**
 	 * Set the listeners for input action.
 	 */
 	private void setListeners() {
-		textField.addKeyListener(new KeyAdapter() {
-			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					retrieve();
-				}
-			}
-			public void keyTyped(KeyEvent e) { }
-			public void keyPressed(KeyEvent e) { }
-		});
-
-		goButton.addActionListener(new ActionListener() {
+		ActionListener retrieveAction = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {			
 				retrieve();
 			}
-		});
+		};
+		
+		textField.addActionListener(retrieveAction);
+		goButton.addActionListener(retrieveAction);
 	}
 	
 	/**
@@ -239,7 +215,7 @@ public class MainFrame extends JFrame {
 		Stock stock = stockQuote.getStock();
 		
 		if (stock.getDate().equals("N/A")) {
-			alert("'" + stock.getName() + "' is not valid stock symbol");
+			JOptionPane.showMessageDialog(null, "'" + stock.getName() + "' is not valid stock symbol");
 			return;
 		}
 		
@@ -254,7 +230,7 @@ public class MainFrame extends JFrame {
 		annRangeLabel.setText(stock.getAnnRange());
 		earnsLabel.setText(stock.getEarns() + "");
 		PELabel.setText(stock.getPE() + "");
-		nameLabel.setText(stock.getName() + " (" + stock.getSymbol() + ")");
+		nameLabel.setText("<html><div style='background: #58b1ff; color: white; padding: 2px;'>" + stock.getName() + " (" + stock.getSymbol() + ")" + "</div></html>");
 		
 		String color = (stock.getChange() < 0) ? "red" : "green";
 		changeLabel.setText("<html><div style='color: "+ color +";'>" + stock.getChange() + " (" + stock.getPercentageChange() + ")" + "<div></html>");
@@ -265,52 +241,35 @@ public class MainFrame extends JFrame {
 	 */
 	protected void retrieve() {
 		if (loading) {
-			textField.setFocusable(false);
 			if ( JOptionPane.showConfirmDialog( null, "Abort previous task and start a new one?", null, JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE) == JOptionPane.OK_OPTION) {
-				textField.setFocusable(true);
 				try {
 					requestWorker.cancel(true);
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
 			} else {
-				textField.setFocusable(true);
 				return;
 			}
 		}
-		textField.setFocusable(true);
 		
 		clearText();
 		String input = textField.getText();
-		
 		
 		if (proxy == null) {
 			try {
 				proxy = StockQuoteProxyFactory.getInstance().createStockQuoteProxy();
 			} catch (WebServiceException e) {
-				alert("No network connection");
+				JOptionPane.showMessageDialog(null, "No network connection");
 				return;
 			}
 		}
 
 		requestWorker = new RequestWorker(this, input, proxy);
 		requestWorker.execute();
-		loadingLabel.setText("Loading " + input + "..");
+		loadingLabel.setText("Loading '" + input + "'..");
 		loading = true;
 	}
 
-	/**
-	 * This prevent users from get stuck with enter loop of alert.
-	 * 
-	 * @param text to display
-	 */
-	private void alert(String text) {
-		textField.setFocusable(false);
-		if( JOptionPane.showConfirmDialog( null, text, null, JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE) == JOptionPane.OK_OPTION ) { 
-			textField.setFocusable(true);
-		} else {
-			textField.setFocusable(true);			
-		}
-	}
+		
 
 }
