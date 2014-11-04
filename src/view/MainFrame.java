@@ -245,7 +245,7 @@ public class MainFrame extends JFrame {
 	/**
 	 * Initiate the worker to retrieve the data.
 	 */
-	protected void retrieve() {
+	private void retrieve() {
 		if (loading) {
 			if ( JOptionPane.showConfirmDialog( null, "Abort previous task and start a new one?", null, JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE) == JOptionPane.OK_OPTION) {
 				try {
