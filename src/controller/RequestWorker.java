@@ -34,6 +34,7 @@ public class RequestWorker extends SwingWorker<StockQuote, Void> {
 	 */
 	@Override
 	protected StockQuote doInBackground() throws Exception {
+		proxy = StockQuoteProxyFactory.getInstance().createStockQuoteProxy();
 		String data = proxy.getQuote(input);
 		StockQuote stockQuote = convertBytesToStockQuote(data.getBytes());
 		return stockQuote;
