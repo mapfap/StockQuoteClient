@@ -1,4 +1,4 @@
-package controller;
+package com.mapfap.quote.controller;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
@@ -12,8 +12,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.ws.WebServiceException;
 
-import view.MainFrame;
-import model.StockQuote;
+import com.mapfap.quote.model.StockQuote;
+import com.mapfap.quote.view.MainFrame;
+
 import net.webservicex.StockQuoteSoap;
 
 /**
@@ -25,15 +26,17 @@ public class RequestWorker extends SwingWorker<StockQuote, Void> {
 
 	private MainFrame frame;
 	private String input;
-	private StockQuoteSoap proxy;
+	private StockQuoteProxyFactory proxyFactory;
 	private boolean isTimeout = false;
 	private Timer timer;
-	private static final int timeout = 5000; //ms
+	private static final int timeout = 6000; //ms
 	
-	public RequestWorker(MainFrame frame, String input, StockQuoteSoap proxy) {
+	private static StockQuoteSoap proxy = null;
+	
+	public RequestWorker(MainFrame frame, String input, StockQuoteProxyFactory proxyFactory) {
 		this.frame = frame;
 		this.input = input;
-		this.proxy = proxy;
+		this.proxyFactory = proxyFactory;
 	}
 	
 	/**
@@ -43,11 +46,17 @@ public class RequestWorker extends SwingWorker<StockQuote, Void> {
 	protected StockQuote doInBackground() throws Exception {
 		setTimeout(timeout);
 		
-		try {			
+		try {
+			if (proxy == null) {
+				proxy = proxyFactory.createStockQuoteProxy();				
+			}
+			
 			String data = proxy.getQuote(input);
-			StockQuote stockQuote  = convertBytesToStockQuote(data.getBytes());
+			StockQuote stockQuote = convertBytesToStockQuote(data.getBytes());
 			return stockQuote;
 		} catch (WebServiceException e) {
+			// reset the proxy if it's errror.
+			proxy = null;
 			return null;
 		}
 		

@@ -1,11 +1,12 @@
-package main;
+package com.mapfap.quote.main;
 
 import javax.swing.SwingUtilities;
 import javax.xml.ws.WebServiceException;
 
-import controller.StockQuoteProxyFactory;
+import com.mapfap.quote.controller.StockQuoteProxyFactory;
+import com.mapfap.quote.view.MainFrame;
+
 import net.webservicex.StockQuoteSoap;
-import view.MainFrame;
 
 /**
  * Main class of this application.
@@ -16,20 +17,11 @@ import view.MainFrame;
 public class Main {
 
 	public static void main(String[] args) {
-
 		SwingUtilities.invokeLater(new Runnable() {
-			private StockQuoteSoap stockQuoteProxy = null;
-
 			@Override
 			public void run() {
 				StockQuoteProxyFactory factory = StockQuoteProxyFactory.getInstance();
-				try {					
-					stockQuoteProxy = factory.createStockQuoteProxy();
-				} catch (WebServiceException e) {
-					// If there's no network connection, Ignore it and try to connect again later.
-				}
-				
-				new MainFrame(stockQuoteProxy);
+				new MainFrame(factory);
 			}
 		});
 

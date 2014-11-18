@@ -1,4 +1,4 @@
-package controller;
+package com.mapfap.quote.controller;
 
 import javax.xml.ws.WebServiceException;
 
